@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+set -eu
+
+# Expport Root Path
+export GSHARK_ROOT=$(cd "$(dirname "$0")"; cd ..; pwd)
+export TOOLS_ROOT=$GSHARK_ROOT/tools
+export PYENV_ROOT=$TOOLS_ROOT/pyenv
+
+# Remove all tools
+rm -fr $TOOLS_ROOT
+
+# Install pyenv
+curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
+export PATH="$PYENV_ROOT/bin:$PATH"
+export PATH="$PYENV_ROOT/shims:$PATH"
+
+# Install Python
+PYTHON_VERSION=$(cat "$GSHARK_ROOT/.python-version")
+pyenv install "$PYTHON_VERSION"
+pyenv global "$PYTHON_VERSION"
+pyenv rehash
+
+# Install Requirements
+pip install -r requirements.txt

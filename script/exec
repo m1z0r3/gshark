@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -eu
+
+export GSHARK_ROOT=$(cd "$(dirname "$0")"; cd ..; pwd)
+export TOOLS_ROOT=$GSHARK_ROOT/tools
+export PYENV_ROOT=$TOOLS_ROOT/pyenv
+
+if [[ ! -d "$PYENV_ROOT" ]]; then
+    echo "ERROR: tools are not installed."
+    exit 1
+fi
+
+export PATH="$PYENV_ROOT/bin:$PATH"
+export PATH="$PYENV_ROOT/shims:$PATH"
+
+exec "$@"
