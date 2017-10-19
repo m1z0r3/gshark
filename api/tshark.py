@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
+import subprocess
 
 def make_filter(display_filter):
     filter_list = []
+
     # Network
     if display_filter.get('network'):
         if display_filter['network'] == 'icmp':
@@ -40,6 +42,28 @@ def make_filter(display_filter):
     if display_filter.get('period_end'):
         filter_list.append('frame.time_epoch <= %s' % display_filter['period_end'])
 
-    filter = ' and '.join(filter_list)
+    return ' and '.join(filter_list)
 
-    return filter
+def exec_command(cmd):
+    try:
+        completed = subprocess.run(
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        if completed.returncode != 0:
+            error = completed.stderr.decode('utf-8')
+            raise CommandError(error)
+        if not completed.stdout.decode('utf-8'):
+            return []
+        else:
+            return completed.stdout.decode('utf-8').rstrip().split('\n')
+    except CommandError as e:
+        raise CommandError(str(e))
+    except:
+        import traceback
+        traceback.print_exc()
+        raise ExecutionError('Something went wrong')
+
+class ExecutionError(Exception):
+    pass
+
+class CommandError(Exception):
+    pass

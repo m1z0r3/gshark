@@ -12,14 +12,16 @@
   margin-top: 1px;
   z-index: 99999 !important;
   background: #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid #f9f9f9; }
 
 .rdtOpen .rdtPicker {
   display: block; }
 
 .rdtStatic .rdtPicker {
-  box-shadow: none;
+  -webkit-box-shadow: none;
+          box-shadow: none;
   position: static; }
 
 .rdtPicker .rdtTimeToggle {
@@ -108,7 +110,6 @@
   /* iOS Safari */
   -webkit-user-select: none;
   /* Chrome/Safari/Opera */
-  -khtml-user-select: none;
   /* Konqueror */
   -moz-user-select: none;
   /* Firefox */
@@ -177,7 +178,6 @@ td.rdtYear:hover {
   /* iOS Safari */
   -webkit-user-select: none;
   /* Chrome/Safari/Opera */
-  -khtml-user-select: none;
   /* Konqueror */
   -moz-user-select: none;
   /* Firefox */

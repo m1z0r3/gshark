@@ -7,7 +7,7 @@ export default class MainNav extends React.Component {
     this.state = { activeKey: 'flowRate' }
   }
 
-  _handleSelect(eventKey) {
+  _handleSelect(eventKey, event) {
     event.preventDefault()
     this.setState({ activeKey: eventKey })
     this.props.onSelect(eventKey)
