@@ -15,6 +15,7 @@ def get_result(path):
         elif os.path.isdir(name):
             result.append(dict(dir=True, name=d, modify=math.floor(st.st_mtime),
                 mode=stat.filemode(st.st_mode), size=convert_bytes(st.st_size)))
+    result = sorted(result, key=lambda x: x['name'])
     return { 'path': os.path.abspath(path), 'result': result }
 
 def convert_bytes(num):

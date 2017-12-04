@@ -11,14 +11,15 @@
       margin-bottom: 15px;
     }
 
-    .textSecond {
-      text-align: center;
+    @media (min-width: 992px) {
+      .second {
+        text-align: center;
+      }
     }
 
     .DisplayFilterDatetimeRange {
       height: 34px;
       line-height: 34px;
-      float: left;
       padding-left: 25px;
       padding-right: 25px;
     }

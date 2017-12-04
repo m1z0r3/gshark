@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from flask import Flask
-from flask import render_template, request, jsonify
+from flask import render_template, request, jsonify, redirect
 
 app = Flask(__name__, static_folder='public')
 app.config['JSON_AS_ASCII'] = False
@@ -8,8 +8,21 @@ app.config['JSON_AS_ASCII'] = False
 #======================================================================#
 # GET /
 #======================================================================#
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
+    return redirect('/flow')
+
+#======================================================================#
+# GET /flow
+# GET /statistic
+# GET /interval
+# GET /filter
+#======================================================================#
+@app.route('/flow', methods=['GET'])
+@app.route('/statistic', methods=['GET'])
+@app.route('/interval', methods=['GET'])
+@app.route('/filter', methods=['GET'])
+def page():
     return render_template('index.html')
 
 #======================================================================#

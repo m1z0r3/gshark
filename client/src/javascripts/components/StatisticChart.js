@@ -1,6 +1,8 @@
+// @flow
 import React from 'react'
 import { Pie } from 'react-chartjs-2'
 import { Table } from 'react-bootstrap'
+import type { StatisticData } from '../app'
 
 const MAX_RANK = 5
 
@@ -18,24 +20,27 @@ const colors = [
   '#b3b5b5',
 ]
 
-export default class StatisticChart extends React.Component {
+type Props = {
+  isChartOpen: boolean,
+  data: StatisticData,
+}
+
+export default class StatisticChart extends React.Component<Props> {
   createData() {
-    let labels = this.props.data.label
-      ? this.props.data.label.length > MAX_RANK
+    const labels =
+      this.props.data.label.length > MAX_RANK
         ? this.props.data.label.slice(0, MAX_RANK).concat(['その他'])
         : this.props.data.label
-      : []
-    let data = this.props.data.data
-      ? this.props.data.data.length > MAX_RANK
+    const data =
+      this.props.data.data.length > MAX_RANK
         ? this.props.data.data
             .slice(0, MAX_RANK)
             .concat([
               this.props.data.data
                 .slice(MAX_RANK, this.props.data.data.length)
-                .reduce((prev, current, index, array) => prev + current),
+                .reduce((prev, current) => prev + current),
             ])
         : this.props.data.data
-      : []
     return {
       labels: labels,
       datasets: [
@@ -48,12 +53,16 @@ export default class StatisticChart extends React.Component {
     }
   }
 
+  shouldComponentUpdate(nextProps: Props): boolean {
+    return nextProps.isChartOpen !== this.props.isChartOpen
+  }
+
   render() {
     return (
-      <div class="StatisticChart">
+      <div className="StatisticChart">
         <div style={this.props.isChartOpen ? styles.open : styles.close}>
           <Pie data={this.createData()} />
-          <div class="StatisticChartTable">
+          <div className="StatisticChartTable">
             <Table striped bordered condensed hover>
               <thead>
                 <tr>
@@ -64,17 +73,16 @@ export default class StatisticChart extends React.Component {
                 </tr>
               </thead>
               <tbody>
-                {this.props.data.label &&
-                  this.props.data.label.map((label, index) => {
-                    return (
-                      <tr>
-                        <td>{index + 1}</td>
-                        <td>{label}</td>
-                        <td>{this.props.data.data[index]}</td>
-                        <td>{this.props.data.ratio[index].toFixed(3)}</td>
-                      </tr>
-                    )
-                  })}
+                {this.props.data.label.map((label, index) => {
+                  return (
+                    <tr key={index}>
+                      <td>{index + 1}</td>
+                      <td>{label}</td>
+                      <td>{this.props.data.data[index]}</td>
+                      <td>{this.props.data.ratio[index].toFixed(3)}</td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </Table>
           </div>

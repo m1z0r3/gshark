@@ -1,7 +1,10 @@
+// @flow
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { PageHeader, Alert } from 'react-bootstrap'
+import { BrowserRouter, Route, Switch } from 'react-router-dom'
 import $ from 'jquery'
+import moment from 'moment'
 import ListDir from './components/ListDir'
 import MainNav from './components/MainNav'
 import DisplayFilter from './components/DisplayFilter'
@@ -9,20 +12,38 @@ import FlowRateChart from './components/FlowRateChart'
 import StatisticChart from './components/StatisticChart'
 import PacketIntervalChart from './components/PacketIntervalChart'
 
-const camelToSnake = string => {
-  return string.replace(/([A-Z])/g, s => '_' + s.charAt(0).toLowerCase())
+export type MainNavState = 'flow' | 'statistic' | 'interval' | 'filter'
+export type FlowRateData = { label: number[], data: number[] }
+export type StatisticData = { label: string[], data: number[], ratio: number[] }
+export type PacketIntervalData = { intervals: number[], freq: number[] }
+
+type Props = {}
+
+type State = {
+  pcapFiles: string[],
+  displayFilter: { [string]: string },
+  mainNavState: MainNavState,
+  flowData: FlowRateData,
+  statisticData: StatisticData,
+  intervalData: PacketIntervalData,
+  filterData: {},
+  isChartOpen: boolean,
+  format: string,
+  output_file: string,
+  alertType: '' | 'success' | 'danger',
+  alertMessage: string,
 }
 
-class App extends React.Component {
+class App extends React.Component<Props, State> {
   constructor(props: any) {
     super(props)
     this.state = {
       pcapFiles: [],
       displayFilter: {},
-      mainNavState: 'flowRate',
-      flowRateData: {},
-      statisticData: {},
-      packetIntervalData: {},
+      mainNavState: this.initialMainNavState(),
+      flowData: { label: [], data: [] },
+      statisticData: { label: [], data: [], ratio: [] },
+      intervalData: { intervals: [], freq: [] },
       filterData: {},
       isChartOpen: false,
       format: 'pcap',
@@ -32,15 +53,39 @@ class App extends React.Component {
     }
   }
 
-  handleClickPcap(pcapFiles) {
+  initialMainNavState(): MainNavState {
+    if (location.pathname === '/flow') {
+      return 'flow'
+    } else if (location.pathname === '/statistic') {
+      return 'statistic'
+    } else if (location.pathname === '/interval') {
+      return 'interval'
+    } else {
+      return 'filter'
+    }
+  }
+
+  apiEndpointUrl(): string {
+    if (this.state.mainNavState === 'flow') {
+      return '/api/flow_rate'
+    } else if (this.state.mainNavState === 'statistic') {
+      return '/api/statistic'
+    } else if (this.state.mainNavState === 'interval') {
+      return '/api/packet_interval'
+    } else {
+      return '/api/filter'
+    }
+  }
+
+  handleClickPcap(pcapFiles: Array<string>) {
     this.setState({ pcapFiles: pcapFiles })
   }
 
-  handleSelectMainNav(eventKey) {
+  handleSelectMainNav(eventKey: MainNavState) {
     this.setState({
       mainNavState: eventKey,
       displayFilter: {},
-      isChartOpen: Object.keys(this.state[`${eventKey}Data`]).length > 0,
+      isChartOpen: false,
       alertType: '',
       alertMessage: '',
     })
@@ -48,18 +93,18 @@ class App extends React.Component {
 
   handleChangeFilter(key, event) {
     if (key === 'format' || key === 'output_file') {
-      this.setState({ [key]: event.target.value })
+      this.setState({ [key]: event.currentTarget.value })
     } else {
       let displayFilter = JSON.parse(JSON.stringify(this.state.displayFilter))
       if (key === 'period_start' || key === 'period_end') {
-        try {
+        if (event instanceof moment) {
           displayFilter[key] = event.unix()
-        } catch (e) {
+        } else {
           delete displayFilter[key]
         }
       } else {
-        if (event.target.value !== '') {
-          displayFilter[key] = event.target.value
+        if (event.currentTarget.value !== '') {
+          displayFilter[key] = event.currentTarget.value
         } else {
           delete displayFilter[key]
         }
@@ -77,7 +122,8 @@ class App extends React.Component {
       alert('出力ファイル名を入力してください')
       return
     }
-    let query =
+    const url = this.apiEndpointUrl()
+    const query =
       this.state.mainNavState === 'filter'
         ? {
             pcap_files: this.state.pcapFiles,
@@ -91,13 +137,13 @@ class App extends React.Component {
           }
     this.setState({ isChartOpen: false })
     $.ajax({
-      url: `/api/${camelToSnake(this.state.mainNavState)}`,
+      url: url,
       type: this.state.mainNavState === 'filter' ? 'POST' : 'GGET',
       contentType: 'application/json',
       data: JSON.stringify(query),
       dataType: 'json',
       success: data => {
-        let nextState =
+        const nextState =
           this.state.mainNavState === 'filter'
             ? data.succeeded
               ? { alertType: 'success', alertMessage: data.succeeded }
@@ -106,7 +152,7 @@ class App extends React.Component {
         this.setState(nextState)
       },
       error: (xhr, status, err) => {
-        console.error(this.props.url, status, err.toString())
+        console.error(url, status, err.toString())
         this.setState({ alertType: 'danger', alertMessage: err.toString() })
       },
     })
@@ -114,6 +160,28 @@ class App extends React.Component {
 
   handleAlertDismiss() {
     this.setState({ alertType: '', alertMessage: '' })
+  }
+
+  renderChart(path: MainNavState) {
+    return () =>
+      path === 'flow' ? (
+        <FlowRateChart
+          isChartOpen={this.state.isChartOpen}
+          data={this.state.flowData}
+        />
+      ) : path === 'statistic' ? (
+        <StatisticChart
+          isChartOpen={this.state.isChartOpen}
+          data={this.state.statisticData}
+        />
+      ) : path === 'interval' ? (
+        <PacketIntervalChart
+          isChartOpen={this.state.isChartOpen}
+          data={this.state.intervalData}
+        />
+      ) : (
+        <div />
+      )
   }
 
   render() {
@@ -133,33 +201,29 @@ class App extends React.Component {
             </Alert>
           )}
         <ListDir onClickPcap={this.handleClickPcap.bind(this)} />
-        <MainNav onSelect={this.handleSelectMainNav.bind(this)} />
-        <DisplayFilter
-          mainNavState={this.state.mainNavState}
-          onChange={this.handleChangeFilter.bind(this)}
-          onSubmit={this.handleSubmitFilter.bind(this)}
-        />
-        {this.state.mainNavState === 'flowRate' ? (
-          <FlowRateChart
-            isChartOpen={this.state.isChartOpen}
-            data={this.state.flowRateData}
-          />
-        ) : this.state.mainNavState === 'statistic' ? (
-          <StatisticChart
-            isChartOpen={this.state.isChartOpen}
-            data={this.state.statisticData}
-          />
-        ) : this.state.mainNavState === 'packetInterval' ? (
-          <PacketIntervalChart
-            isChartOpen={this.state.isChartOpen}
-            data={this.state.packetIntervalData}
-          />
-        ) : (
-          <div />
-        )}
+        <BrowserRouter>
+          <div className="router-container">
+            <MainNav onSelect={this.handleSelectMainNav.bind(this)} />
+            <DisplayFilter
+              mainNavState={this.state.mainNavState}
+              onChange={this.handleChangeFilter.bind(this)}
+              onSubmit={this.handleSubmitFilter.bind(this)}
+            />
+            <Switch>
+              <Route path="/flow" render={this.renderChart('flow')} />
+              <Route path="/statistic" render={this.renderChart('statistic')} />
+              <Route path="/interval" render={this.renderChart('interval')} />
+              <Route path="/filter" render={this.renderChart('filter')} />
+            </Switch>
+          </div>
+        </BrowserRouter>
       </div>
     )
   }
 }
 
-ReactDOM.render(<App />, document.getElementById('app'))
+const app = document.getElementById('app')
+
+if (app instanceof Element) {
+  ReactDOM.render(<App />, app)
+}

@@ -1,19 +1,27 @@
+// @flow
 import React from 'react'
 import { Line } from 'react-chartjs-2'
 import moment from 'moment'
+import type { FlowRateData } from '../app'
 
 const styles = {
   open: { marginTop: 50 },
   close: { display: 'none' },
 }
 
-export default class FlowRateChart extends React.Component {
+type Props = {
+  isChartOpen: boolean,
+  data: FlowRateData,
+}
+
+export default class FlowRateChart extends React.Component<Props> {
   createData() {
-    let labels = this.props.data.label
-      ? this.props.data.label.map(label =>
-          moment(label * 1000).format('YYYY/MM/DD HH:mm:ss'),
-        )
-      : []
+    const labels =
+      this.props.data.label.length > 0
+        ? this.props.data.label.map(label =>
+            moment(label * 1000).format('YYYY/MM/DD HH:mm:ss'),
+          )
+        : []
     return {
       labels: labels,
       datasets: [
@@ -42,9 +50,13 @@ export default class FlowRateChart extends React.Component {
     }
   }
 
+  shouldComponentUpdate(nextProps: Props): boolean {
+    return nextProps.isChartOpen !== this.props.isChartOpen
+  }
+
   render() {
     return (
-      <div class="FlowRateChart">
+      <div className="FlowRateChart">
         <div style={this.props.isChartOpen ? styles.open : styles.close}>
           <Line data={this.createData()} />
         </div>

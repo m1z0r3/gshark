@@ -1,6 +1,8 @@
+// @flow
 import React from 'react'
 import { Grid, Row, Col, Button, FormGroup, FormControl } from 'react-bootstrap'
 import Datetime from 'react-datetime'
+import type { MainNavState } from '../app'
 
 const formats = [
   'pcap',
@@ -15,19 +17,25 @@ const formats = [
   'text',
 ]
 
-export default class DisplayFilter extends React.Component {
+type Props = {
+  mainNavState: MainNavState,
+  onChange: (string, SyntheticEvent<*>) => void,
+  onSubmit: () => void,
+}
+
+export default class DisplayFilter extends React.Component<Props> {
   render() {
     return (
       <div className="DisplayFilter">
-        {(this.props.mainNavState === 'flowRate' ||
-          this.props.mainNavState === 'packetInterval' ||
+        {(this.props.mainNavState === 'flow' ||
+          this.props.mainNavState === 'interval' ||
           this.props.mainNavState === 'filter') && (
           <Grid className="DisplayFilterGrid">
             <Row className="show-grid">
-              <Col xs={4} md={2} className="DisplayFilterText">
+              <Col xs={5} md={3} lg={2} className="DisplayFilterText">
                 ネットワーク層
               </Col>
-              <Col xs={4} md={2}>
+              <Col xs={5} md={3} lg={2}>
                 <FormGroup controlId="formControlsSelect1">
                   <FormControl
                     componentClass="select"
@@ -41,13 +49,13 @@ export default class DisplayFilter extends React.Component {
                 </FormGroup>
               </Col>
             </Row>
-            {(this.props.mainNavState === 'packetInterval' ||
+            {(this.props.mainNavState === 'interval' ||
               this.props.mainNavState === 'filter') && (
               <Row className="show-grid">
-                <Col xs={4} md={2} className="DisplayFilterText textFirst">
+                <Col xs={5} md={3} lg={2} className="DisplayFilterText first">
                   送信元IPアドレス
                 </Col>
-                <Col xs={4} md={2}>
+                <Col xs={5} md={3} lg={2}>
                   <FormGroup controlId="formControlsText1">
                     <FormControl
                       type="text"
@@ -55,10 +63,10 @@ export default class DisplayFilter extends React.Component {
                     />
                   </FormGroup>
                 </Col>
-                <Col xs={4} md={2} className="DisplayFilterText textSecond">
+                <Col xs={5} md={3} lg={2} className="DisplayFilterText second">
                   宛先IPアドレス
                 </Col>
-                <Col xs={4} md={2}>
+                <Col xs={5} md={3} lg={2}>
                   <FormGroup controlId="formControlsText2">
                     <FormControl
                       type="text"
@@ -69,10 +77,10 @@ export default class DisplayFilter extends React.Component {
               </Row>
             )}
             <Row className="show-grid">
-              <Col xs={4} md={2} className="DisplayFilterText">
+              <Col xs={5} md={3} lg={2} className="DisplayFilterText">
                 トランスポート層
               </Col>
-              <Col xs={4} md={2}>
+              <Col xs={5} md={3} lg={2}>
                 <FormGroup controlId="formControlsSelect2">
                   <FormControl
                     componentClass="select"
@@ -86,10 +94,10 @@ export default class DisplayFilter extends React.Component {
               </Col>
             </Row>
             <Row className="show-grid">
-              <Col xs={4} md={2} className="DisplayFilterText">
+              <Col xs={5} md={3} lg={2} className="DisplayFilterText">
                 アプリケーション層
               </Col>
-              <Col xs={4} md={2}>
+              <Col xs={5} md={3} lg={2}>
                 <FormGroup controlId="formControlsSelect3">
                   <FormControl
                     componentClass="select"
@@ -104,13 +112,13 @@ export default class DisplayFilter extends React.Component {
                 </FormGroup>
               </Col>
             </Row>
-            {(this.props.mainNavState === 'packetInterval' ||
+            {(this.props.mainNavState === 'interval' ||
               this.props.mainNavState === 'filter') && (
               <Row className="show-grid">
-                <Col xs={4} md={2} className="DisplayFilterText textFirst">
+                <Col xs={5} md={3} lg={2} className="DisplayFilterText first">
                   送信元ポート番号
                 </Col>
-                <Col xs={4} md={2}>
+                <Col xs={5} md={3} lg={2}>
                   <FormGroup controlId="formControlsText3">
                     <FormControl
                       type="text"
@@ -118,10 +126,10 @@ export default class DisplayFilter extends React.Component {
                     />
                   </FormGroup>
                 </Col>
-                <Col xs={4} md={2} className="DisplayFilterText textSecond">
+                <Col xs={5} md={3} lg={2} className="DisplayFilterText second">
                   宛先IPポート番号
                 </Col>
-                <Col xs={4} md={2}>
+                <Col xs={5} md={3} lg={2}>
                   <FormGroup controlId="formControlsText4">
                     <FormControl
                       type="text"
@@ -135,17 +143,19 @@ export default class DisplayFilter extends React.Component {
         )}
         <Grid className="DisplayFilterGrid">
           <Row className="show-grid">
-            <Col xs={4} md={2} className="DisplayFilterText">
+            <Col xs={5} md={3} lg={2} className="DisplayFilterText">
               期間
             </Col>
-            <Col xs={4} md={2}>
+            <Col xs={5} md={3} lg={2}>
               <Datetime
                 locale="ja"
                 onChange={this.props.onChange.bind(this, 'period_start')}
               />
             </Col>
-            <div className="DisplayFilterDatetimeRange"> 〜 </div>
-            <Col xs={4} md={2}>
+            <Col xs={1} md={1}>
+              <div className="DisplayFilterDatetimeRange"> 〜 </div>
+            </Col>
+            <Col xs={5} md={3} lg={2}>
               <Datetime
                 locale="ja"
                 onChange={this.props.onChange.bind(this, 'period_end')}
@@ -156,27 +166,29 @@ export default class DisplayFilter extends React.Component {
         {this.props.mainNavState === 'filter' && (
           <Grid className="DisplayFilterGrid">
             <Row className="show-grid">
-              <Col xs={4} md={2} className="DisplayFilterText">
+              <Col xs={5} md={3} lg={2} className="DisplayFilterText">
                 出力フォーマット
               </Col>
-              <Col xs={4} md={2}>
+              <Col xs={5} md={3} lg={2}>
                 <FormGroup controlId="formControlsSelect4">
                   <FormControl
                     componentClass="select"
                     onChange={this.props.onChange.bind(this, 'format')}
                   >
-                    {formats.map(format => (
-                      <option value={format}>{format}</option>
+                    {formats.map((format, index) => (
+                      <option key={index} value={format}>
+                        {format}
+                      </option>
                     ))}
                   </FormControl>
                 </FormGroup>
               </Col>
             </Row>
             <Row className="show-grid">
-              <Col xs={4} md={2} className="DisplayFilterText">
+              <Col xs={5} md={3} lg={2} className="DisplayFilterText">
                 出力ファイル名
               </Col>
-              <Col xs={4} md={4}>
+              <Col xs={5} md={4}>
                 <FormGroup controlId="formControlsText5">
                   <FormControl
                     type="text"

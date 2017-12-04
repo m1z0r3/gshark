@@ -1,24 +1,30 @@
+// @flow
 import React from 'react'
 import { Line } from 'react-chartjs-2'
-import moment from 'moment'
+import type { PacketIntervalData } from '../app'
 
 const styles = {
   open: { marginTop: 50 },
   close: { display: 'none' },
 }
 
-export default class PacketIntervalChart extends React.Component {
+type Props = {
+  isChartOpen: boolean,
+  data: PacketIntervalData,
+}
+
+export default class PacketIntervalChart extends React.Component<Props> {
   createData() {
-    let labels = this.props.data.intervals
-      ? this.props.data.intervals
-          .slice(0, this.props.data.intervals.length - 1)
-          .map(
-            (interval, index) =>
-              `${interval.toFixed(4)} ~ ${this.props.data.intervals[
-                index + 1
-              ].toFixed(4)}`,
-          )
-      : []
+    const intervals = this.props.data.intervals
+    const labels =
+      intervals.length > 0
+        ? intervals
+            .slice(0, intervals.length - 1)
+            .map(
+              (interval, index) =>
+                `${interval.toFixed(4)} ~ ${intervals[index + 1].toFixed(4)}`,
+            )
+        : []
     return {
       labels: labels,
       datasets: [
@@ -47,9 +53,13 @@ export default class PacketIntervalChart extends React.Component {
     }
   }
 
+  shouldComponentUpdate(nextProps: Props): boolean {
+    return nextProps.isChartOpen !== this.props.isChartOpen
+  }
+
   render() {
     return (
-      <div class="PacketIntervalChart">
+      <div className="PacketIntervalChart">
         <div style={this.props.isChartOpen ? styles.open : styles.close}>
           <Line data={this.createData()} />
         </div>

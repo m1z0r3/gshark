@@ -1,4 +1,4 @@
-# How to develop client
+# gshark フロントエンド開発方法
 
 gshark のフロントエンドの開発方法について説明します。
 

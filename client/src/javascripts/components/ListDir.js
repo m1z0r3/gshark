@@ -1,10 +1,26 @@
+// @flow
 import React from 'react'
 import { Panel, Table } from 'react-bootstrap'
 import FontAwesome from 'react-fontawesome'
 import $ from 'jquery'
 import moment from 'moment'
 
-export default class ListDir extends React.Component {
+type Props = {
+  onClickPcap: (Array<string>) => void,
+}
+
+type State = {
+  currentPath: string,
+  data: {
+    dir: boolean,
+    mode: string,
+    modify: number,
+    name: string,
+    size: string,
+  }[],
+}
+
+export default class ListDir extends React.Component<Props, State> {
   constructor(props: any) {
     super(props)
     this.state = {
@@ -17,7 +33,7 @@ export default class ListDir extends React.Component {
     this.getListDir(this.state.currentPath)
   }
 
-  handleClickPcap(key, event) {
+  handleClickPcap(key: number) {
     let data = JSON.parse(JSON.stringify(this.state.data))
     data[key].selected = !data[key].selected
     this.setState({ data: data })
@@ -26,14 +42,15 @@ export default class ListDir extends React.Component {
     )
   }
 
-  handleClickDir(dir, event) {
+  handleClickDir(dir: string) {
     this.getListDir(`${this.state.currentPath}/${dir}`)
     this.props.onClickPcap([])
   }
 
-  getListDir(path) {
+  getListDir(path: string) {
+    const url = '/api/list_dir'
     $.ajax({
-      url: '/api/list_dir',
+      url: url,
       type: 'GET',
       data: { path: path },
       dataType: 'json',
@@ -41,19 +58,19 @@ export default class ListDir extends React.Component {
         this.setState({ data: data['result'], currentPath: data['path'] })
       },
       error: (xhr, status, err) => {
-        console.error(this.props.url, status, err.toString())
+        console.error(url, status, err.toString())
       },
     })
   }
 
-  isPcapFile(filename) {
-    let filenameArray = filename.split('.')
+  isPcapFile(filename: string): boolean {
+    const filenameArray = filename.split('.')
     if (filenameArray.length === 1) return false
-    let extension = filenameArray[filenameArray.length - 1]
+    const extension = filenameArray[filenameArray.length - 1]
     return extension === 'pcap' || extension === 'pcapng'
   }
 
-  fullPath(filename) {
+  fullPath(filename: string): string {
     return `${this.state.currentPath}/${filename}`
   }
 
@@ -70,7 +87,7 @@ export default class ListDir extends React.Component {
           <tbody>
             {this.state.data.map((file, index) => {
               return this.isPcapFile(file.name) ? (
-                <tr className="listDirPcapTr">
+                <tr className="listDirPcapTr" key={index}>
                   <td
                     onClick={this.handleClickPcap.bind(this, index)}
                     className="listDirPointer"

@@ -242,12 +242,12 @@ td.rdtYear:hover {
       height: 34px;
       line-height: 34px;
       margin-bottom: 15px; }
-    .DisplayFilter .DisplayFilterGrid .textSecond {
-      text-align: center; }
+    @media (min-width: 992px) {
+      .DisplayFilter .DisplayFilterGrid .second {
+        text-align: center; } }
     .DisplayFilter .DisplayFilterGrid .DisplayFilterDatetimeRange {
       height: 34px;
       line-height: 34px;
-      float: left;
       padding-left: 25px;
       padding-right: 25px; }
     .DisplayFilter .DisplayFilterGrid .submitBtn {
