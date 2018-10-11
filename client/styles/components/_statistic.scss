@@ -1,0 +1,30 @@
+.statistic-nav {
+  &__button {
+    width: 33% !important;
+  }
+}
+
+.statistic-blacklist {
+  margin-top: 30px;
+  padding-left: 20px;
+}
+
+.statistic-chart {
+  margin-top: 80px;
+
+  &__table {
+    margin-top: 50px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+
+    td,
+    th {
+      padding: 8px !important;
+
+      &:first-child {
+        text-align: center;
+      }
+    }
+  }
+}

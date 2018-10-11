@@ -97,8 +97,18 @@ ENV/
 # mypy
 .mypy_cache/
 
+# node_modules
+node_modules/
+
+# tmp
+tmp/
+
 # tools
 tools/
 
-# pcap
-pcap/*
+# source map
+*.map
+
+# Built assets
+public/index.css
+public/index.js

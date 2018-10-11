@@ -1,6 +1,6 @@
 # gshark
 
-MWS Cup 2017 Pre-challenge
+Grate web interface for tshark
 
 ## Usage
 

@@ -1,0 +1,155 @@
+#!/usr/bin/env bash
+
+set -eu
+
+export GSHARK_ROOT=$(cd "$(dirname "$0")"; cd ..; pwd)
+export TOOLS_ROOT=$GSHARK_ROOT/tools
+export NODENV_ROOT=$TOOLS_ROOT/nodenv
+
+export NODE_VERSION=$(cat "$GSHARK_ROOT/.node-version")
+
+#===========================================================================#
+# common functions
+#===========================================================================#
+
+print() {
+    printf "\e[4mdevtool\e[0m: "
+    echo "$@"
+}
+
+print_exec() {
+    print "$@"
+    "$@"
+}
+
+error() {
+    printf "\e[4mdevtool\e[0m: \e[31mERROR: "
+    echo "$@"
+    printf "\e[0m"
+}
+
+warning() {
+    printf "\e[4mdevtool\e[0m: \e[33mWARNING: "
+    echo "$@"
+    printf "\e[0m"
+}
+
+command_exists() {
+    which "$1" >/dev/null 2>&1
+    return $?
+}
+
+subcommand_exists() {
+    local cmd=$1
+    grep -q "^cmd_$cmd(" "$0"
+}
+
+check_devtool_installed() {
+    if [[ -d "$NODENV_ROOT" ]]; then
+        export PATH="$NODENV_ROOT/bin:$PATH"
+        export PATH="$NODENV_ROOT/shims:$PATH"
+    else
+        error "client devtool is not installed."
+        exit 1
+    fi
+}
+
+#===========================================================================#
+# commands
+#===========================================================================#
+
+cmd_setup() {
+    if ! command_exists git; then
+        error "gshark2 requires git for client development"
+        exit 1
+    fi
+
+    # Remove all client development tools
+    print_exec rm -fr $NODENV_ROOT
+
+    # Install nodenv
+    print_exec git clone https://github.com/nodenv/nodenv.git "$NODENV_ROOT"
+    print_exec git clone git://github.com/nodenv/node-build.git "$NODENV_ROOT/plugins/node-build"
+    export PATH="$NODENV_ROOT/bin:$PATH"
+    export PATH="$NODENV_ROOT/shims:$PATH"
+
+    # Install node
+    print_exec nodenv install "$NODE_VERSION"
+    print_exec nodenv global "$NODE_VERSION"
+    print_exec nodenv rehash
+
+    # Install yarn
+    print_exec npm i -g npm
+    print_exec npm install -g yarn
+    print_exec nodenv rehash
+
+    # Install dependencies
+    print_exec yarn install
+}
+
+cmd_build() {
+    check_devtool_installed
+    yarn run build
+}
+
+cmd_watch() {
+    check_devtool_installed
+    yarn run watch
+}
+
+cmd_lint() {
+    check_devtool_installed
+    yarn run lint
+}
+
+cmd_format() {
+    check_devtool_installed
+    yarn run format
+}
+
+cmd_exec() {
+    check_devtool_installed
+    exec "$@"
+}
+
+cmd_help() {
+    echo "Useful development tool for gshark2"
+    echo
+    echo "Usage:"
+    echo "    $0 [COMMAND] [ARGS...]"
+    echo
+    echo "Commands:"
+    echo "    setup   Build (or rebuild) gshark2 client development environment"
+    echo "    build   Execute \`yarn run build\`"
+    echo "    watch   Execute \`yarn run watch\`"
+    echo "    lint    Execute \`yarn run lint\`"
+    echo "    format  Execute \`yarn run format\`"
+    echo "    exec    Execute command in development environment"
+}
+
+# aliases
+cmd_-h() { cmd_help; }
+cmd_--help() { cmd_help; }
+
+#===========================================================================#
+
+main() {
+    if [ $# -eq 0 ]; then
+        cmd_help
+        exit 1
+    fi
+
+    local cmd=$1
+    shift
+
+    if subcommand_exists "$cmd"; then
+        "cmd_$cmd" "$@"
+    else
+        error "$cmd is not a devtool command"
+        echo
+        cmd_help
+        exit 1
+    fi
+}
+
+main "$@"

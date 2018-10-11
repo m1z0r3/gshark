@@ -14,4 +14,8 @@ fi
 export PATH="$PYENV_ROOT/bin:$PATH"
 export PATH="$PYENV_ROOT/shims:$PATH"
 
-python app.py
+if [[ $# -eq 1 && $1 = "--dev" ]]; then
+    env FLASK_ENV=development python app.py
+else
+    python app.py
+fi

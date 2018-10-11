@@ -6,20 +6,33 @@ set -eu
 export GSHARK_ROOT=$(cd "$(dirname "$0")"; cd ..; pwd)
 export TOOLS_ROOT=$GSHARK_ROOT/tools
 export PYENV_ROOT=$TOOLS_ROOT/pyenv
+export GEOIP2_DIR=$TOOLS_ROOT/geoip2
+export BLACKLIST_DIR=$TOOLS_ROOT/blacklist
+
+set -x
 
 # Remove all tools
-rm -fr $TOOLS_ROOT
+rm -fr $PYENV_ROOT
 
 # Install pyenv
 curl -L https://raw.githubusercontent.com/pyenv/pyenv-installer/master/bin/pyenv-installer | bash
 export PATH="$PYENV_ROOT/bin:$PATH"
 export PATH="$PYENV_ROOT/shims:$PATH"
 
-# Install Python
+# Install python
 PYTHON_VERSION=$(cat "$GSHARK_ROOT/.python-version")
 pyenv install "$PYTHON_VERSION"
 pyenv global "$PYTHON_VERSION"
 pyenv rehash
 
-# Install Requirements
+# Install requirements
+pip install --upgrade pip
 pip install -r requirements.txt
+
+# Download GeoLite2 Country Database
+rm -fr $GEOIP2_DIR && mkdir $GEOIP2_DIR
+curl -L http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.gz | tar zx --strip=1 -C $GEOIP2_DIR
+
+# Make blacklist directory
+mkdir -p $BLACKLIST_DIR/ip
+mkdir -p $BLACKLIST_DIR/domain

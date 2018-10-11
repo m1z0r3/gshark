@@ -1,0 +1,18 @@
+@import '../../node_modules/react-datetime/css/react-datetime';
+@import './components/ddos';
+@import './components/display_filter';
+@import './components/export';
+@import './components/file_list';
+@import './components/flow_rate';
+@import './components/statistic';
+@import './components/submit_button';
+
+.container {
+  margin-bottom: 50px;
+}
+
+.loading-modal-loader {
+  display: block;
+  padding: 80px 0px;
+  text-align: center;
+}

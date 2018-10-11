@@ -1,0 +1,17 @@
+.display-filter {
+  margin-top: 25px;
+  margin-bottom: 30px !important;
+
+  &__text {
+    height: 34px;
+    line-height: 34px;
+    margin-bottom: 15px;
+  }
+
+  &__datatime-range {
+    height: 34px;
+    line-height: 34px;
+    padding-left: 25px;
+    padding-right: 25px;
+  }
+}

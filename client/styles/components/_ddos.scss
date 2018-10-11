@@ -1,0 +1,19 @@
+.ddos-result {
+  margin-top: 50px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 85%;
+
+  td,
+  th {
+    padding: 8px !important;
+
+    &:first-child {
+      text-align: center;
+    }
+
+    &:nth-child(2) {
+      min-width: 180px;
+    }
+  }
+}

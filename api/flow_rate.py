@@ -1,40 +1,28 @@
 #!/usr/bin/env python3
-from api import tshark
+from . import tshark
 
-def get_result(pcap_files, display_filter):
+
+def get_result(input_files, filter):
     time_list = []
-    start_time_list, end_time_list = [], []
 
-    filter = tshark.make_filter(display_filter)
-
-    for pcap_file in pcap_files:
-        # Get list of packet epoch time
-        cmd = 'tshark -r \'{pcap}\' -T fields -e frame.time_epoch -Y "{filter}"' \
-            .format(pcap=pcap_file, filter=filter)
-        cmd_result = tshark.exec_command(cmd)
-        tmp_time_list = [float(result) for result in cmd_result]
-        if tmp_time_list:
-            time_list.extend(tmp_time_list)
-            start_time_list.append(int(tmp_time_list[0]))
-            end_time_list.append(int(tmp_time_list[-1]))
-
-    if not time_list:
-        cmd = 'tshark -r \'{pcap}\' -T fields -e frame.time_epoch' \
-            .format(pcap=pcap_files[0])
-        cmd_result = tshark.exec_command(cmd)
-        tmp_time_list = [float(result) for result in cmd_result]
-        start_time_list.append(int(tmp_time_list[0]))
-        end_time_list.append(int(tmp_time_list[-1]))
+    for file in input_files:
+        cmd_result = tshark.fields(file, filter, ['frame.time_epoch'])
+        time_list.extend([float(result) for result in cmd_result])
 
     # If period is specified, it is set as the time axis
-    if display_filter.get('period_start'):
-        start_time = int(display_filter['period_start'])
+    if filter.period.start:
+        start_time = int(filter.period.start)
     else:
-        start_time = min(start_time_list)
-    if display_filter.get('period_end'):
-        end_time = int(display_filter['period_end'])
+        start_time = int(min(time_list)) if time_list else None
+
+    if filter.period.end:
+        end_time = int(filter.period.end)
     else:
-        end_time = max(end_time_list)
+        end_time = int(max(time_list)) if time_list else None
+
+    # Set value if start_time or end_time is None
+    start_time = start_time or end_time
+    end_time = end_time or start_time
 
     # Calc interval
     duration = end_time - start_time
@@ -46,13 +34,19 @@ def get_result(pcap_files, display_filter):
         label.append(time)
         count = len([x for x in time_list if time < x < time + interval])
         data.append(count)
-    return { 'label': label, 'data': data }
+    return {'label': label, 'data': data}
+
 
 def calc_interval(duration):
-    if duration > 60 * 60 * 24: return 60 * 60 * 24
-    elif duration > 60 * 60:    return 60 * 60
-    elif duration > 60 * 30:    return 60 * 2
-    elif duration > 60:         return 60
-    elif duration > 30:         return 2
-    elif duration > 1:          return 1
-    else:                       return 0.05
+    if duration > 60 * 60 * 24:
+        return 60 * 60 * 24
+    elif duration > 60 * 60:
+        return 60 * 60
+    elif duration > 60 * 30:
+        return 60 * 2
+    elif duration > 60:
+        return 60
+    elif duration > 30:
+        return 2
+    else:
+        return 1

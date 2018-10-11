@@ -15,14 +15,18 @@ $ script/setup
 
 ## 起動
 
-`script/start` コマンドで `tools/` に置いた pyenv 環境で Flask を立ち上げます。
+`script/start` コマンドで `tools/` に置いた pyenv 環境で Flask を立ち上げます。development モードで Flask サーバを立ち上げるには `-- dev` オプションを付けます。
 
 ```bash
 # Flask サーバを立ち上げる
 $ script/start
-
 # もしくは下記でも同様
 $ script/exec python app.py
+
+# 開発用サーバを立ち上げる
+$ script/start --dev
+# もしくは下記でも同様
+$ script/exec env FLASK_ENV=development python app.py
 ```
 
 ## その他
@@ -45,4 +49,19 @@ $ script/exec python
 $ script/exec pip install flask
 # requirements.txt を更新
 $ script/exec pip freeze -l > requirements.txt
+```
+
+## Lint
+
+`flake8` により文法チェックを行うことができます。
+
+```bash
+# requirements-dev.txt をインストール
+$ script/exec pip install -r requirements-dev.txt
+
+# flake8 により文法チェック
+$ script/exec flake8 --statistics
+
+# autopep8 により自動フォーマット
+$ script/exec autopep8 -ivr .
 ```

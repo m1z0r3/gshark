@@ -1,22 +1,18 @@
 #!/usr/bin/env python3
 import numpy as np
-from api import tshark
+from . import tshark
 
-def get_result(pcap_files, display_filter):
+
+def get_result(input_files, filter):
     time_list = []
 
-    filter = tshark.make_filter(display_filter)
-
-    for pcap_file in pcap_files:
-        cmd = 'tshark -r \'{pcap}\' -T fields -e frame.time_delta_displayed -Y "{filter}"' \
-            .format(pcap=pcap_file, filter=filter)
-        cmd_result = tshark.exec_command(cmd)
+    for file in input_files:
+        cmd_result = tshark.fields(file, filter, ['frame.time_delta_displayed'])
         time_list.extend([float(result) for result in cmd_result])
 
-    if (len(time_list) > 0):
+    if len(time_list) > 0:
         freq, intervals = np.histogram(time_list, 100)
-        freq = freq.tolist()
-        intervals = intervals.tolist()
+        freq, intervals = freq.tolist(), intervals.tolist()
     else:
-        freq, intervals = ([], [])
-    return { 'freq': freq, 'intervals': intervals }
+        freq, intervals = [], []
+    return {'freq': freq, 'intervals': intervals}
