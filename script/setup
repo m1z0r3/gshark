@@ -8,7 +8,7 @@ export TOOLS_ROOT=$GSHARK_ROOT/tools
 export PYENV_ROOT=$TOOLS_ROOT/pyenv
 export GEOIP2_DIR=$TOOLS_ROOT/geoip2
 export BLACKLIST_DIR=$TOOLS_ROOT/blacklist
-
+export BLOCKLIST_IPSETS_DIR=$TOOLS_ROOT/blocklist-ipsets
 set -x
 
 # Remove all tools
@@ -36,3 +36,8 @@ curl -L http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.tar.
 # Make blacklist directory
 mkdir -p $BLACKLIST_DIR/ip
 mkdir -p $BLACKLIST_DIR/domain
+# Download blacklist from blocklist-ipsets
+# https://github.com/firehol/blocklist-ipsets
+rm -fr $BLOCKLIST_IPSETS_DIR && mkdir $BLOCKLIST_IPSETS_DIR
+git clone https://github.com/firehol/blocklist-ipsets $BLOCKLIST_IPSETS_DIR
+cut -d '#' -f -1  $BLOCKLIST_IPSETS_DIR/{feodo,sslbl_aggressive,zeus,blocklist_de*}.ipset| sort -u > $BLACKLIST_DIR/ip/blocklist_ipsets.txt
